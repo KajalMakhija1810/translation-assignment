@@ -1,35 +1,53 @@
 package stepdefinitions.scrapeArticles;
 
 import factory.DriverFactory;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.openqa.selenium.WebDriver;
-import tests.scrapeArticlesTests.ScrapeArticlesTests;
+import tests.scrapeArticles.ScrapeArticlesTests;
+import validations.scrapeArticles.ScrapeArticlesValidation;
 
-public class ScrapeArticlesStepDefinitions
-{
+import java.util.HashMap;
+
+public class ScrapeArticlesStepDefinitions {
+
     WebDriver driver;
-    ScrapeArticlesTests scrapeArticlesTests;
+    tests.scrapeArticles.ScrapeArticlesTests scrapeArticlesTests;
 
-    public ScrapeArticlesStepDefinitions()
-    {
+    public ScrapeArticlesStepDefinitions() {
         this.driver = DriverFactory.getDriver();
-        scrapeArticlesTests = new ScrapeArticlesTests(driver);
-
+        this.scrapeArticlesTests = new ScrapeArticlesTests(driver);
     }
 
     @Given("I visit the home page and click on agree button")
-    public void iVisitTheHomePage() {
-            scrapeArticlesTests.visitHomePageAndClickOnAgreeButton();
+    public void iVisitTheHomePageAndClickOnAgreeButton() {
+
+        scrapeArticlesTests.iVisitTheHomePageAndClickOnAgreeButton();
     }
 
-    @Then("I click on the sidebar toggle button and navigate to the opinion section")
+    @Given("I click on the sidebar toggle button and navigate to the opinion section")
     public void iClickOnTheSidebarToggleButtonAndNavigateToTheOpinionSection() {
-    scrapeArticlesTests.clickOnSidebarToggleButtonAndNavigateToOpinionsSection();
+        scrapeArticlesTests.iClickOnTheSidebarToggleButtonAndNavigateToTheOpinionSection();
     }
 
-    @Then("I fetch the first five articles in Spanish")
-    public void iFetchTheFirstFiveArticlesInSpanish() {
+    @Then("I fetch and verify the first five articles along with their content")
+    public void iFetchAndVerifyTheFirstFiveArticlesAlongWithTheirContent() {
 
+        scrapeArticlesTests.iFetchAndVerifyTheFirstFiveArticlesAlongWithTheirContent();
     }
+
+    @And("I translate all the article titles to English and print them")
+    public void iTranslateAllTheArticleTitlesToEnglishAndPrintThem() {
+
+       scrapeArticlesTests.iTranslateAllTheArticleTitlesToEnglishAndPrintThem();
+    }
+
+    @And("Count the repeated words whose count is greater than 2")
+    public void countTheRepeatedWordsWhoseCountIsGreaterThan2() {
+        scrapeArticlesTests.countRepeatedWordsInHeader();
+    }
+
+
 }

@@ -7,57 +7,58 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import validations.scrapeArticles.constants.ScrapeArticlesConstants;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-public class ScrapeArticlesValidation implements ScrapeArticlesConstants
-{
+public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
+
     WebDriver driver;
-    HashMap<String,String> articles;
+    HashMap<String, String> articles;
+    HashMap<Integer, String> translatedArticles;
 
     public ScrapeArticlesValidation(WebDriver driver) {
         this.driver = driver;
         articles = new HashMap<>();
+        this.translatedArticles = new HashMap<>();
     }
 
-    public void visitHomePage()
-    {
+    public void visitHomePage() {
         driver.get("https://elpais.com/");
-
     }
 
-    public void clickOnAgreeButton()
-    {
+    public void clickOnAgreeButton() {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
         WebElement agreeButton = wait.until(ExpectedConditions.visibilityOfElementLocated(AGREE_BUTTON));
         agreeButton.click();
     }
 
-
-    public void clickSidebarToggleButton()
-    {
+    public void clickSidebarToggleButton() {
         driver.findElement(SIDEBAR_TOGGLE_BUTTON).click();
     }
 
-    public void navigateToOpinionSection(){
+    public void navigateToOpinionSection() {
         driver.findElement(By.xpath(OPINION_SECTION)).click();
-        List<WebElement> articles = driver.findElements(By.xpath(ARTICLES_SECTION_XPATH));
+        List<WebElement> articlesList = driver.findElements(By.xpath(ARTICLES_SECTION_XPATH));
 
-        for (int i = 0; i < articles.size(); i++) {
-            WebElement article = articles.get(i);
+        for (int i = 0; i < Math.min(5, articlesList.size()); i++) {
+            WebElement article = articlesList.get(i);
             WebElement articleLink = article.findElement(By.xpath(".//header/h2/a"));
             String articleUrl = articleLink.getAttribute("href");
             String articleTitle = articleLink.getText();
 
             System.out.println("Article " + (i + 1) + ": " + articleUrl);
-            openArticleInNewTabAndVerifyTheTitleAndExtractTitleAndContent(articleUrl,articleTitle);
-
+            openArticleInNewTabAndVerifyTitleAndExtractContent(articleUrl, articleTitle);
         }
-
     }
 
-    public  void openArticleInNewTabAndVerifyTheTitleAndExtractTitleAndContent(String url, String expectedTitle) {
+    public void openArticleInNewTabAndVerifyTitleAndExtractContent(String url, String expectedTitle) {
         openNewTabWithUrl(url);
 
         String originalHandle = driver.getWindowHandle();
@@ -69,11 +70,13 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants
             System.out.println("Title: " + actualTitle);
 
             String articleContent = extractArticleContent();
+
             if (articleContent != null) {
                 System.out.println("Article Content: " + articleContent);
-                articles.put("Title: " + actualTitle, "Content: " + articleContent);
+                articles.put( actualTitle, articleContent);
             } else {
-                System.out.println("No content.");
+                System.out.println("No content found for this article.");
+                articles.put( actualTitle, "");
             }
         }
 
@@ -119,7 +122,7 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants
         }
 
         if (content != null && content.getText().trim().length() > 0) {
-            return content.getText();
+            return content.getAttribute("textContent");
         }
 
         return null;
@@ -130,14 +133,82 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants
         driver.switchTo().window(originalHandle);
     }
 
+    public void translateAndPrintArticleTitles() {
+        Integer articleNo = 1;
+        for (String articleTitle : articles.keySet()) {
+            String translatedTitle = translateTextToEnglish(articleTitle);
+            System.out.println("Translated Title: " + translatedTitle);
+            translatedArticles.put(articleNo, translatedTitle);
+            articleNo++;
 
+        }
+    }
 
+    public String translateTextToEnglish(String text) {
+        try {
+            String apiUrl = "https://rapid-translate-multi-traduction.p.rapidapi.com/t";
+            String requestBody = String.format("{\"from\":\"es\",\"to\":\"en\",\"q\":\"%s\"}", text);
 
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(apiUrl))
+                    .header("x-rapidapi-key", "a346cd2159msh53a66a7cfbc1db6p1448d4jsn226b25afd22c")
+                    .header("x-rapidapi-host", "rapid-translate-multi-traduction.p.rapidapi.com")
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
 
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            return parseTranslationResponse(response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    public String parseTranslationResponse(String responseBody) {
+        String translatedText = null;
+        try {
+            translatedText = responseBody;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        return translatedText;
+    }
 
+    public void printAllTitles() {
+        System.out.println("All Translated Titles:");
+        for (Map.Entry<Integer, String> entry : translatedArticles.entrySet()) {
+            System.out.println("Article " + entry.getKey() + ": " + entry.getValue());
+        }
+    }
 
+    public void countRepeatedWords() {
+        HashMap<String, Integer> wordCount = new HashMap<>();
+
+        StringBuilder allTitles = new StringBuilder();
+        for (String title : translatedArticles.values()) {
+            allTitles.append(title).append(" ");
+        }
+        System.out.println("All Titles Combined:\n" + allTitles.toString());
+
+        String[] words = allTitles.toString().split("\\W+");  // \\W+ matches any non-word characters
+
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                word = word.toLowerCase();
+                wordCount.put(word, wordCount.getOrDefault(word, 0) + 1);
+            }
+        }
+        
+        System.out.println("Repeated Words (appearing more than twice):");
+        for (Map.Entry<String, Integer> entry : wordCount.entrySet()) {
+            if (entry.getValue() > 2) {
+                System.out.println("Word: '" + entry.getKey() + "' - Count: " + entry.getValue());
+            }
+        }
+    }
 
 
 }
+

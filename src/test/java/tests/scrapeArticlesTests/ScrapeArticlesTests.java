@@ -1,30 +1,52 @@
-package tests.scrapeArticlesTests;
+package tests.scrapeArticles;
 
+import factory.DriverFactory;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.openqa.selenium.WebDriver;
 import validations.scrapeArticles.ScrapeArticlesValidation;
+
+import java.util.HashMap;
 
 public class ScrapeArticlesTests {
 
     WebDriver driver;
     ScrapeArticlesValidation scrapeArticlesValidation;
+
     public ScrapeArticlesTests(WebDriver driver) {
-        this.driver = driver;
-        scrapeArticlesValidation = new ScrapeArticlesValidation(driver);
+        this.driver = DriverFactory.getDriver();
+        this.scrapeArticlesValidation = new ScrapeArticlesValidation(driver);
     }
-    public void visitHomePageAndClickOnAgreeButton()
-    {
+
+
+    public void iVisitTheHomePageAndClickOnAgreeButton() {
+
         scrapeArticlesValidation.visitHomePage();
         scrapeArticlesValidation.clickOnAgreeButton();
-
     }
 
-    public void clickOnSidebarToggleButtonAndNavigateToOpinionsSection()
-    {
+
+    public void iClickOnTheSidebarToggleButtonAndNavigateToTheOpinionSection() {
+
         scrapeArticlesValidation.clickSidebarToggleButton();
-        scrapeArticlesValidation.navigateToOpinionSection();
     }
 
 
+    public void iFetchAndVerifyTheFirstFiveArticlesAlongWithTheirContent() {
 
+        scrapeArticlesValidation.navigateToOpinionSection();
 
-}
+    }
+        public void iTranslateAllTheArticleTitlesToEnglishAndPrintThem() {
+
+            scrapeArticlesValidation.translateAndPrintArticleTitles();
+        }
+
+        public void countRepeatedWordsInHeader()
+        {
+            scrapeArticlesValidation.printAllTitles();
+            scrapeArticlesValidation.countRepeatedWords();
+        }
+
+    }
