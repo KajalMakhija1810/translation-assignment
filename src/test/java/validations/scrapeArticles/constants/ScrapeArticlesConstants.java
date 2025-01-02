@@ -13,4 +13,6 @@ public interface ScrapeArticlesConstants {
     By AGREE_BUTTON =  By.xpath("//button[@id='didomi-notice-agree-button']");
 
     String CONTENT_SECTION_XPATH = "//div[@class='a_c clearfix']";
+
+    String IMAGE_SECTION_XPATH = "//div[@class='a_e_m']/figure/span/img";
 }

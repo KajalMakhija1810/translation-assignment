@@ -32,7 +32,7 @@ public class ScrapeArticlesStepDefinitions {
         scrapeArticlesTests.iClickOnTheSidebarToggleButtonAndNavigateToTheOpinionSection();
     }
 
-    @Then("I fetch and verify the first five articles along with their content")
+    @Then("I fetch and verify the first five articles along with their content and download cover image if present")
     public void iFetchAndVerifyTheFirstFiveArticlesAlongWithTheirContent() {
 
         scrapeArticlesTests.iFetchAndVerifyTheFirstFiveArticlesAlongWithTheirContent();

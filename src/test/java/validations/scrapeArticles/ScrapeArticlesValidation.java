@@ -7,7 +7,14 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import validations.scrapeArticles.constants.ScrapeArticlesConstants;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -15,7 +22,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
 
@@ -78,11 +84,70 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
                 System.out.println("No content found for this article.");
                 articles.put( actualTitle, "");
             }
+
         }
+
+        downloadCoverImage(actualTitle);
 
         closeTabAndSwitchBack(originalHandle, newTabHandle);
     }
+    public void downloadCoverImage(String articleTitle) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        try {
 
+            WebElement coverImage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(IMAGE_SECTION_XPATH)));
+
+
+            String imageUrl = coverImage.getAttribute("src");
+
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                System.out.println("Image URL: " + imageUrl);
+
+
+                String safeArticleTitle = articleTitle.replaceAll("[^a-zA-Z0-9]", "_"); // Replace unsafe characters with underscores
+
+
+                downloadImage(imageUrl, safeArticleTitle + ".jpg");
+
+            } else {
+                System.out.println("Cover image not found.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error downloading cover image: " + e.getMessage());
+        }
+    }
+    public void downloadImage(String imageUrl, String fileName) {
+        try {
+
+            URL url = new URL(imageUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+
+            InputStream inputStream = connection.getInputStream();
+
+
+            FileOutputStream outputStream = new FileOutputStream(new File(fileName));
+
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            // Close the streams
+            outputStream.close();
+            inputStream.close();
+
+            System.out.println("Image downloaded successfully: " + fileName);
+
+        } catch (IOException e) {
+            System.out.println("Error downloading image: " + e.getMessage());
+        }
+    }
     public void openNewTabWithUrl(String url) {
         String script = "window.open('" + url + "', '_blank');";
         ((org.openqa.selenium.JavascriptExecutor) driver).executeScript(script);
