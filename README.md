@@ -32,7 +32,6 @@ You will also need to install the necessary dependencies:
 
 2. Download the WebDriver for your browser:
     - [ChromeDriver](https://sites.google.com/chromium.org/driver/)
-    - [GeckoDriver for Firefox](https://github.com/mozilla/geckodriver/releases)
 
 3. Set up your preferred Java IDE (IntelliJ IDEA, Eclipse, etc.) or use the command line.
 
