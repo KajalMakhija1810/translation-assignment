@@ -12,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -79,34 +78,26 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
 
             if (articleContent != null) {
                 System.out.println("Article Content: " + articleContent);
-                articles.put( actualTitle, articleContent);
+                articles.put(actualTitle, articleContent);
             } else {
                 System.out.println("No content found for this article.");
-                articles.put( actualTitle, "");
+                articles.put(actualTitle, "");
             }
-
         }
-
         downloadCoverImage(actualTitle);
-
         closeTabAndSwitchBack(originalHandle, newTabHandle);
     }
+
     public void downloadCoverImage(String articleTitle) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
         try {
 
             WebElement coverImage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(IMAGE_SECTION_XPATH)));
-
-
             String imageUrl = coverImage.getAttribute("src");
 
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 System.out.println("Image URL: " + imageUrl);
-
-
                 String safeArticleTitle = articleTitle.replaceAll("[^a-zA-Z0-9]", "_"); // Replace unsafe characters with underscores
-
-
                 downloadImage(imageUrl, safeArticleTitle + ".jpg");
 
             } else {
@@ -116,38 +107,33 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
             System.out.println("Error downloading cover image: " + e.getMessage());
         }
     }
+
     public void downloadImage(String imageUrl, String fileName) {
         try {
-
             URL url = new URL(imageUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
 
-
             InputStream inputStream = connection.getInputStream();
 
-
             FileOutputStream outputStream = new FileOutputStream(new File(fileName));
-
 
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
             }
-
-            // Close the streams
             outputStream.close();
             inputStream.close();
-
             System.out.println("Image downloaded successfully: " + fileName);
 
         } catch (IOException e) {
             System.out.println("Error downloading image: " + e.getMessage());
         }
     }
+
     public void openNewTabWithUrl(String url) {
         String script = "window.open('" + url + "', '_blank');";
         ((org.openqa.selenium.JavascriptExecutor) driver).executeScript(script);
@@ -255,7 +241,6 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
         for (String title : translatedArticles.values()) {
             allTitles.append(title).append(" ");
         }
-        System.out.println("All Titles Combined:\n" + allTitles.toString());
 
         String[] words = allTitles.toString().split("\\W+");  // \\W+ matches any non-word characters
 
@@ -265,7 +250,7 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
                 wordCount.put(word, wordCount.getOrDefault(word, 0) + 1);
             }
         }
-        
+
         System.out.println("Repeated Words (appearing more than twice):");
         for (Map.Entry<String, Integer> entry : wordCount.entrySet()) {
             if (entry.getValue() > 2) {

@@ -12,7 +12,6 @@ public class DriverFactory {
     public ChromeOptions options;
 
     public void initDriver()  throws MalformedURLException  {
-        System.out.println("initialising driver");
         System.setProperty("webdriver.chrome.driver", "src/test/resources/drivers/chromedriver.exe");
         options = new ChromeOptions();
         options.addArguments("--remote-allow-origins=*");
@@ -22,7 +21,6 @@ public class DriverFactory {
     }
 
     public static WebDriver getDriver() {
-        System.out.println("driver");
         return tl.get();
     }
     }
