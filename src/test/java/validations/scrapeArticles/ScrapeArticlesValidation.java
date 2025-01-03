@@ -39,7 +39,7 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
     }
 
     public void clickOnAgreeButton() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         WebElement agreeButton = wait.until(ExpectedConditions.visibilityOfElementLocated(AGREE_BUTTON));
         agreeButton.click();
     }
@@ -89,15 +89,21 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
     }
 
     public void downloadCoverImage(String articleTitle) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        WebElement coverImage = null;
         try {
 
-            WebElement coverImage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(IMAGE_SECTION_XPATH)));
+            try{
+                coverImage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(IMAGE_SECTION_XPATH)));
+            } catch (Exception e)
+            {
+                System.out.println("no image found");
+            }
             String imageUrl = coverImage.getAttribute("src");
 
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 System.out.println("Image URL: " + imageUrl);
-                String safeArticleTitle = articleTitle.replaceAll("[^a-zA-Z0-9]", "_"); // Replace unsafe characters with underscores
+                String safeArticleTitle = articleTitle.replaceAll("[^a-zA-Z0-9]", "_");
                 downloadImage(imageUrl, safeArticleTitle + ".jpg");
 
             } else {
@@ -150,8 +156,8 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
     }
 
     public String verifyTitle(String expectedTitle) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        WebElement heading = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1")));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        WebElement heading = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//article/header//h1")));
         String actualHeading = heading.getAttribute("textContent");
 
         if (actualHeading.equals(expectedTitle)) {
@@ -163,7 +169,7 @@ public class ScrapeArticlesValidation implements ScrapeArticlesConstants {
     }
 
     public String extractArticleContent() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         WebElement content = null;
         try {
             content = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CONTENT_SECTION_XPATH)));

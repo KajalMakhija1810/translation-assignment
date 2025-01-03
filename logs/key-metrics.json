@@ -1,0 +1,14 @@
+[ {
+  "duration" : 0.013000011444091797,
+  "eventName" : "sdk:pre-test",
+  "startTime" : 1.3431973969866E9,
+  "success" : true,
+  "worker" : 1,
+  "failure" : null,
+  "details" : null,
+  "entryType" : "measure",
+  "platform" : 0,
+  "command" : null,
+  "testName" : null,
+  "hookType" : ""
+} ]
